@@ -2,16 +2,17 @@ const colorModel = require("../../models/colorModel");
 
 let colorController = {
     create: async (req, res) => {
+        let {name ,code ,order} = req.body
         console.log(req.body);
         let insertObj = {
-            name: ,
-            code: ,
-            order: 
+            name ,
+            code,
+            order
         }
 
 
         try {
-            let checkSameColor = await colorModel.findOne({ name: colorname })
+            let checkSameColor = await colorModel.findOne({ name })
 
             if (checkSameColor) {
                 res.send({
