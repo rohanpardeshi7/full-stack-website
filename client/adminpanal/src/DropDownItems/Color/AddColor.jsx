@@ -1,19 +1,21 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SketchPicker } from 'react-color';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 
 
 const AddColors = () => {
   const [name, setName] = useState("");
   const [order, setOrder] = useState("");
-  const [code, setCode] = useState("#000000"); 
-  const [error,setError] = useState(null)
+  const [code, setCode] = useState("#000000");
+  const [error, setError] = useState(null)
 
   let apibaseurl = import.meta.env.VITE_APIBASEURL
-  console.log(apibaseurl);
   let navigate = useNavigate()
+
+  let { id } = useParams()
+  console.log(id)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,31 +24,69 @@ const AddColors = () => {
       code,
       order
     }
+    
+    if (id) {
+      //Update
+      axios.put(`${apibaseurl}color/update/${id}`, obj)
+        .then((res) => res.data)
+        .then((finalres) => {
+          if (finalres.status) {
+            //color Updated
+            setError(null)
+            toast.success("Color Updated")
+            setTimeout(() => {
+              navigate("/view-color")
+            }, 2000);
 
-
-    axios.post(`${apibaseurl}color/create`, obj)
-      .then((res) => res.data)
-      .then((finalres) => {
-          if(finalres.status){
-              //color add
-              setError(null)
-              toast.success("Color Added")
-              setTimeout(() => {
-                 navigate("/view-color")
-              }, 2000);
-             
-          }else{
+          } else {
             setError(finalres.error)
           }
-      })
-  };
+        })
+
+    } else {
+      axios.post(`${apibaseurl}color/create`, obj)
+        .then((res) => res.data)
+        .then((finalres) => {
+          if (finalres.status) {
+            //color add
+            setError(null)
+            toast.success("Color Added")
+            setTimeout(() => {
+              navigate("/view-color")
+            }, 2000);
+
+          } else {
+            setError(finalres.error)
+          }
+        })
+    };
+  }
+
+
+  useEffect(() => {
+    if (id) {
+      axios.get(`${apibaseurl}color/details/${id}`)
+        .then((res) => res.data)
+        .then((finalRes) => {
+          let { name, order, code } = finalRes.data
+          setName(name),
+            setCode(code,
+              setOrder(order)
+            )
+        })
+    } else {
+      setName(""),
+        setCode("#000")
+      setOrder("")
+    }
+  }, [id])
 
 
 
   return (
     <div className="max-w-xxl mx-auto bg-white border border-gray-200 rounded-2xl shadow-xl mt-10 overflow-hidden select-none">
       <h2 className="text-xl font-bold bg-gray-50 px-6 py-4 border-b border-gray-100 text-slate-800">
-        Add Colors 🎨
+        {id ? "Update" : "Add"} Colors 🎨
       </h2>
 
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -55,7 +95,7 @@ const AddColors = () => {
           {
             error?.name && <span className="text-red-500">{error.name}</span>
           }
-          
+
           <label className="block text-sm font-semibold text-slate-700 mb-1.5">Color Name</label>
           <input
             type="text"
@@ -120,14 +160,14 @@ const AddColors = () => {
             type="submit"
             className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm py-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer active:scale-[0.98]"
           >
-            Add Color to Database
+            {id ? "Update" : "Add"} Color to Database
           </button>
         </div>
       </form>
-       <ToastContainer />
+      <ToastContainer />
     </div>
   );
- 
+
 };
 
 export default AddColors;

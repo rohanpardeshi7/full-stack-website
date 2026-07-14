@@ -66,6 +66,7 @@ let colorController = {
         }
         res.send(obj)
     },
+
     put: async (req, res) => {
         let {id} = req.params
       console.log(id)
@@ -77,8 +78,53 @@ let colorController = {
             updateRes
         }
         res.send(obj)
+    },
+    multiDelete: async (req,res)=>{
+        let {ids} = req.body
+        let delRes = await colorModel.deleteMany({_id:ids})
+        let obj = {
+            status: true,
+            massage: "color Deleted",
+            delRes
+        }
+        res.send(obj)
+    },
+    changestatus: async (req,res)=>{
+        let {ids} = req.body
+        for ( v of ids){
+            let oldStatus = await colorModel.findOne({_id:v}).select("status")
+            let {status} = oldStatus    
+            await colorModel.updateOne(
+                {
+                    _id:v
+                },
+                {
+                    $set:{
+                        status:!status
+                    }
+                }
+            )
+        }
+        let obj = {
+            status: true,
+            massage: "color Status Updated",
+        }
+        res.send(obj)
+    },
+    details: async (req,res) =>{
+        let {id} = req.params
+        let  data = await colorModel.findOne({_id:id});
+        let obj = {
+            status : true,
+            message: "Color Details Found",
+            data
+        }
+        res.send(obj)
     }
-}
+
+    }
+  
+
 
 module.exports = colorController
 

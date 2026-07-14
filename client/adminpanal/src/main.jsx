@@ -45,6 +45,8 @@ createRoot(document.getElementById("root")).render(
           <Route path="/contact-enquirys" element={<ContactEnquiry />} />
           <Route path="/newslatters" element={<NewsLatter />} />
           <Route path="/add-color" element={<AddColor />} />
+          <Route path="/edit-color/:id" element={<AddColor />} />
+
           <Route path="/view-color" element={<ViewColor />} />
           <Route path="/add-material" element={<AddMarerial />} />
           <Route path="/view-material" element={<ViewMaterial />} />
