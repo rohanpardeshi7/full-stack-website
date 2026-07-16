@@ -1,19 +1,26 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {Pencil, Search, SlidersHorizontal, Trash2, ToggleLeft, RefreshCw } from "lucide-react";
+import { Pencil, Search, SlidersHorizontal, Trash2, ToggleLeft, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
 const ViewColor = () => {
   const [showSearch, setShowSearch] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+
   const [data, setData] = useState([]);
   const [ids, setIds] = useState([])
 
   let apibaseurl = import.meta.env.VITE_APIBASEURL;
 
   let getColors = () => {
-    axios.get(`${apibaseurl}color/view`)
+    axios.get(`${apibaseurl}color/view`,{
+      params:{
+        name,
+        code
+      }
+    })
       .then((res) => res.data)
       .then((finaRes) => {
         if (finaRes.status) {
@@ -81,10 +88,14 @@ const ViewColor = () => {
     getColors();
   }, []);
 
+
+
   // Filter colors based on dynamic data state
-  const filteredColors = data.filter((color) =>
-    color.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredColors = data.filter((color) => {
+    const matchesName = color.name.toLowerCase().includes(name.toLowerCase());
+    const matchesCode = color.code.toLowerCase().includes(code.toLowerCase());
+    return matchesName && matchesCode;
+  });
 
   return (
     <div className="max-w-9xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-xl mt-6 overflow-hidden select-none">
@@ -92,15 +103,47 @@ const ViewColor = () => {
       {/* Dynamic Search / Filter Bar */}
       {showSearch && (
         <div className="bg-slate-50 p-4 border-b border-slate-100 transition-all duration-300">
-          <div className="flex items-center border border-slate-300 w-full max-w-lg bg-white rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-500 transition-all">
-            <Search className="text-slate-400 mr-2" size={18} />
-            <input
-              type="text"
-              placeholder="Type color name to filter..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-grow py-1 outline-none text-sm text-slate-700"
-            />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full max-w-3xl mx-auto">
+
+            {/* Inputs Container */}
+            <div className="flex flex-col sm:flex-row flex-grow items-center border border-slate-300 bg-white rounded-xl px-3 py-1.5 focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-500 transition-all gap-2 sm:gap-0">
+
+              {/* Name Input */}
+              <div className="flex items-center w-full sm:w-1/2 sm:border-r border-slate-200 pr-2">
+                <Search className="text-slate-400 mr-2 flex-shrink-0" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search color name..."
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full py-1 outline-none text-sm text-slate-700 bg-transparent"
+                />
+              </div>
+
+              {/* Code Input */}
+              <div className="flex items-center w-full sm:w-1/2 pl-0 sm:pl-3">
+                <input
+                  type="text"
+                  placeholder="Search hex code..."
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="w-full py-1 outline-none text-sm text-slate-700 bg-transparent"
+                />
+              </div>
+
+            </div>
+
+            {/*   Search Button */}
+            <button
+              type="button"
+              onClick={getColors}
+              // 💡 Agar tum backend API par direct query fire karna chaho toh onClick par apna custom handler ya getColors function chala sakte ho
+              className="flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex-shrink-0"
+            >
+              <Search size={16} />
+              Search
+            </button>
+
           </div>
         </div>
       )}

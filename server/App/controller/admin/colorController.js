@@ -1,11 +1,12 @@
 const colorModel = require("../../models/colorModel");
+const { options } = require("../../routes/adminRoutes");
 
 let colorController = {
     create: async (req, res) => {
-        let {name ,code ,order} = req.body
+        let { name, code, order } = req.body
         console.log(req.body);
         let insertObj = {
-            name ,
+            name,
             code,
             order
         }
@@ -47,14 +48,36 @@ let colorController = {
         }
     },
     view: async (req, res) => {
-        let data = await colorModel.find()
-        let obj = {
-            status: true,
-            massage: "color viewed",
-            data
-        }
-        res.send(obj)
-    },
+        try{
+            let orCondition = []
+            if (req.query.name) {
+                orCondition.push({ name: new RegExp(req.query.name, "i") })
+            }//name:"red"
+            if (req.query.code) {
+                orCondition.push({ code: new RegExp(req.query.code, "i")  })
+            }//code:"#000"
+
+            let filter = {}
+
+            if (orCondition.length >= 1) {
+                filter.$or = orCondition
+            }
+            let data = await colorModel.find(filter)
+            let obj = {
+                status: true,
+                massage: "color viewed",
+                data
+            }
+            res.send(obj)
+    } catch(err){
+        res.status(500 ).send({
+            status: false,
+            message: "Internal Server Error",
+            error: err.message
+        })
+    }},
+        
+    
     delete: async (req, res) => {
         let { id } = req.params
 
@@ -68,9 +91,9 @@ let colorController = {
     },
 
     put: async (req, res) => {
-        let {id} = req.params
-      console.log(id)
-       let updateRes = await colorModel.updateOne({_id:id},{$set:req.body})
+        let { id } = req.params
+        console.log(id)
+        let updateRes = await colorModel.updateOne({ _id: id }, { $set: req.body })
 
         let obj = {
             status: true,
@@ -79,9 +102,9 @@ let colorController = {
         }
         res.send(obj)
     },
-    multiDelete: async (req,res)=>{
-        let {ids} = req.body
-        let delRes = await colorModel.deleteMany({_id:ids})
+    multiDelete: async (req, res) => {
+        let { ids } = req.body
+        let delRes = await colorModel.deleteMany({ _id: ids })
         let obj = {
             status: true,
             massage: "color Deleted",
@@ -89,18 +112,18 @@ let colorController = {
         }
         res.send(obj)
     },
-    changestatus: async (req,res)=>{
-        let {ids} = req.body
-        for ( v of ids){
-            let oldStatus = await colorModel.findOne({_id:v}).select("status")
-            let {status} = oldStatus    
+    changestatus: async (req, res) => {
+        let { ids } = req.body
+        for (v of ids) {
+            let oldStatus = await colorModel.findOne({ _id: v }).select("status")
+            let { status } = oldStatus
             await colorModel.updateOne(
                 {
-                    _id:v
+                    _id: v
                 },
                 {
-                    $set:{
-                        status:!status
+                    $set: {
+                        status: !status
                     }
                 }
             )
@@ -111,19 +134,19 @@ let colorController = {
         }
         res.send(obj)
     },
-    details: async (req,res) =>{
-        let {id} = req.params
-        let  data = await colorModel.findOne({_id:id});
+    details: async (req, res) => {
+        let { id } = req.params
+        let data = await colorModel.findOne({ _id: id });
         let obj = {
-            status : true,
+            status: true,
             message: "Color Details Found",
             data
         }
         res.send(obj)
     }
 
-    }
-  
+}
+
 
 
 module.exports = colorController
