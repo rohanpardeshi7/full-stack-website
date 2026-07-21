@@ -137,8 +137,7 @@ const ViewColor = () => {
             <button
               type="button"
               onClick={getColors}
-              // 💡 Agar tum backend API par direct query fire karna chaho toh onClick par apna custom handler ya getColors function chala sakte ho
-              className="flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex-shrink-0"
+               className="flex items-center justify-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md transition-all active:scale-95 cursor-pointer flex-shrink-0"
             >
               <Search size={16} />
               Search
