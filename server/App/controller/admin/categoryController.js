@@ -1,6 +1,7 @@
 const categoryModel = require("../../models/categoryModel")
 
 let categoryController = {
+    // ------------------- CREATE CATEGORY -------------------
     create: async (req, res) => {
         let { name, order } = req.body
 
@@ -9,10 +10,8 @@ let categoryController = {
             order
         }
 
-        if (req.file) {
-            if (req.file.filename) {
-                insertobj['image'] = req.file.filename
-            }
+        if (req.file && req.file.filename) {
+            insertobj['image'] = req.file.filename
         }
         
         try {
@@ -48,38 +47,49 @@ let categoryController = {
 
             return res.status(500).json({
                 status: false,
-                message: "category error",
+                message: "Category Error",
                 error: errorObj
             })
         }
-    } ,
+    },
+
+    // ------------------- VIEW CATEGORIES -------------------
     view: async (req, res) => {
-        try{
+        try {
             let orCondition = []
             if (req.query.name) {
                 orCondition.push({ name: new RegExp(req.query.name, "i") })
-            }//name:"red"
+            }
+            
             let filter = {}
-
             if (orCondition.length >= 1) {
                 filter.$or = orCondition
             }
+
             let data = await categoryModel.find(filter)
+
+            // 💡 Ensure static path always ends with a slash '/'
+            let basePath = process.env.CATEGORYSTATICPATH || "http://localhost:8000/uploads/category/";
+            if (!basePath.endsWith("/")) {
+                basePath += "/";
+            }
+
             let obj = {
                 status: true,
-                path: process.env.CATEGORYSTATICPATH,
-                massage: "Category found",
+                path: basePath,
+                message: "Category found", // 💡 Corrected spelling from 'massage'
                 data
             }
-            res.send(obj)
-    } catch(err){
-        res.status(500 ).send({
-            status: false,
-            message: "Internal Server Error",
-            error: err.message
-        })
-    }}
-
+            
+            return res.status(200).json(obj)
+        } catch (err) {
+            return res.status(500).json({
+                status: false,
+                message: "Internal Server Error",
+                error: err.message
+            })
+        }
+    }
 }
 
 module.exports = categoryController;

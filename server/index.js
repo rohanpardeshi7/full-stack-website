@@ -13,7 +13,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use("/admin", adminRoutes);
-app.use("uploads/category",express.static("uploads/category"))
+app.use("/uploads/category",express.static("uploads/category"))
 
 app.listen(process.env.PORT, async () => {
     await dbConnection();

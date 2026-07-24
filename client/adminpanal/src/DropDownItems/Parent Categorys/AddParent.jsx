@@ -1,7 +1,14 @@
+import axios from 'axios';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 
 const AddCategory = () => {
   const [file, setFile] = useState(null);
+  const [error, setError] = useState(null)
+  let navigate = useNavigate()
+
+  let apibaseurl = import.meta.env.VITE_APIBASEURL
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -15,8 +22,23 @@ const AddCategory = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Here you'll handle backend request later (fetch/axios)
-    console.log('Form submitted');
+    
+    let formData = new FormData(e.target)
+    axios.post(`${apibaseurl}category/create`, formData)
+        .then((res) => res.data)
+        .then((finalres) => {
+          if (finalres.status) {
+            //color add
+            setError(null)
+            toast.success("Category Added")
+            setTimeout(() => {
+              navigate("/view-parent-category")
+            }, 2000);
+
+          } else {
+            setError(finalres.error)
+          }
+        })
   };
 
   return (
@@ -60,7 +82,7 @@ const AddCategory = () => {
             <input
               type="file"
               id="fileInput"
-              name="categoryImage"
+              name="image"
               onChange={handleFileChange}
               className="hidden"
             />
@@ -72,7 +94,7 @@ const AddCategory = () => {
               <label className="block font-semibold mb-1">Category Name</label>
               <input
                 type="text"
-                name="categoryName"
+                name="name"
                 placeholder="Category Name"
                 className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
@@ -102,6 +124,7 @@ const AddCategory = () => {
         </div>
       </form>
       {/* Form End */}
+      <ToastContainer />
     </div>
   );
 };
