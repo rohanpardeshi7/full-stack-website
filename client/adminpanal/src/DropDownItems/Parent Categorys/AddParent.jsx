@@ -28,7 +28,7 @@ const AddCategory = () => {
         .then((res) => res.data)
         .then((finalres) => {
           if (finalres.status) {
-            //color add
+            // add
             setError(null)
             toast.success("Category Added")
             setTimeout(() => {
@@ -39,6 +39,15 @@ const AddCategory = () => {
             setError(finalres.error)
           }
         })
+        .catch((err) => {
+        // 💡 FIX: HTTP Status 400 Bad Request error catch yahan handle hua
+        if (err.response && err.response.data && err.response.data.error) {
+          setError(err.response.data.error);
+        } else {
+          toast.error("Something went wrong on server!");
+        }
+      });
+  
   };
 
   return (
@@ -91,6 +100,9 @@ const AddCategory = () => {
           {/* Category Name & Order */}
           <div className="space-y-4">
             <div>
+              {
+            error?.name && <span className="text-red-500">{error.name}</span>
+          }
               <label className="block font-semibold mb-1">Category Name</label>
               <input
                 type="text"
@@ -101,6 +113,9 @@ const AddCategory = () => {
               />
             </div>
             <div>
+                  {
+            error?.order && <span className="text-red-500">{error.order}</span>
+          }
               <label className="block font-semibold mb-1">Order</label>
               <input
                 type="number"

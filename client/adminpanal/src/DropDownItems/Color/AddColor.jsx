@@ -78,6 +78,7 @@ const AddColors = () => {
       setName(""),
         setCode("#000")
       setOrder("")
+      setError(null)
     }
   }, [id])
 

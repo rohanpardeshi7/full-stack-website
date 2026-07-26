@@ -1,13 +1,15 @@
 const categoryModel = require("../../models/categoryModel")
+const subCategoryModel = require("../../models/subCategoryModel")
 
-let categoryController = {
+let subCategoryController = {
     // ------------------- CREATE CATEGORY -------------------
     create: async (req, res) => {
-        let { name, order } = req.body
+        let { name, order, parant } = req.body
 
         let insertobj = {
             name,
-            order
+            order,
+            parant
         }
 
         if (req.file && req.file.filename) {
@@ -15,32 +17,32 @@ let categoryController = {
         }
         
         try {
-            let checkSameCategory = await categoryModel.findOne({
+            let checkSubSameCategory = await subCategoryModel.findOne({
                 $or : [
                     {name:name},
                     {order:order}
                 ]
             })
 
-            if(checkSameCategory){
+            if(checkSubSameCategory){
                 let errorObj = {}
-                if(checkSameCategory.name === name){
-                    errorObj.name = "Category Name Already Exist";
+                if(checkSubSameCategory.name === name){
+                    errorObj.name = "Sub Category Name Already Exist";
                 }
-                if(checkSameCategory.order == order){
-                    errorObj.order = "Category Order Number Already Exist";
+                if(checkSubSameCategory.order == order){
+                    errorObj.order = "Sub Category Order Number Already Exist";
                 }
                 return res.status(400).json({
                     status: false,
-                    message: "Category Error",
+                    message: "Sub Category Error",
                     error: errorObj
                 });
             } else {
-                let categoryRes = await categoryModel.create(insertobj)
+                let subCategoryRes = await subCategoryModel.create(insertobj)
                 let obj = {
                     status : true,
-                    message: "Category Added",
-                    categoryRes
+                    message: "Sub Category Added",
+                    subCategoryRes
                 }
                 return res.status(200).json(obj)
             }
@@ -58,7 +60,7 @@ let categoryController = {
 
             return res.status(500).json({
                 status: false,
-                message: "Category Error",
+                message: "Sub Category Error",
                 error: errorObj
             })
         }
@@ -77,10 +79,10 @@ let categoryController = {
                 filter.$or = orCondition
             }
 
-            let data = await categoryModel.find(filter)
+            let data = await subCategoryModel.find(filter).populate('parant','name')
 
             // 💡 Ensure static path always ends with a slash '/'
-            let basePath = process.env.CATEGORYSTATICPATH || "http://localhost:8000/uploads/category/";
+            let basePath = process.env.SUBCATEGORYSTATICPATH || "http://localhost:8000/uploads/subCategory/";
             if (!basePath.endsWith("/")) {
                 basePath += "/";
             }
@@ -88,7 +90,7 @@ let categoryController = {
             let obj = {
                 status: true,
                 path: basePath,
-                message: "Category found", // 💡 Corrected spelling from 'massage'
+                message: "Sub Category found", 
                 data
             }
             
@@ -100,7 +102,16 @@ let categoryController = {
                 error: err.message
             })
         }
+    },
+    parant: async (req,res) =>{
+        let data = await categoryModel.find({status:true}).select("name")
+        let obj = {
+            status: true,
+            data,
+            message:"Parant Category Found"
+        }
+        res.send(obj)
     }
 }
 
-module.exports = categoryController;
+module.exports = subCategoryController;

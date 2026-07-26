@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import axios from 'axios';
+import React, { useState, useRef, useEffect } from 'react';
 
 function AddSubCategoryForm() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -9,6 +10,7 @@ function AddSubCategoryForm() {
   const [parentCategory, setParentCategory] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [order, setOrder] = useState('');
+  const [parant,setParant] = useState([])
 
   // --- Drag and Drop Handlers ---
   const handleDragOver = (event) => {
@@ -60,34 +62,31 @@ function AddSubCategoryForm() {
   };
 
   // --- Form Submission Handler ---
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // Here you would typically send your form data to a backend
-    const formData = new FormData();
-    if (selectedFile) {
-      formData.append('categoryImage', selectedFile);
-    }
-    formData.append('parentCategory', parentCategory);
-    formData.append('categoryName', categoryName);
-    formData.append('order', order);
+  const handleSubmit = (e) => {
+    event.preventDefault()
+    let formData = new FormData(e.target)
+    axios.post(`${apibaseurl}subcategory/create`,formData)
+    .then((res)=>res.data)
+    .then((finalRes)=>{
+      if(finalRes.status){
+        alert(finalRes.message)
+      }else{
 
-    console.log('Submitting form data:', {
-      selectedFile: selectedFile ? selectedFile.name : 'No file',
-      parentCategory,
-      categoryName,
-      order,
-    });
-    // Example: fetch('/api/add-subcategory', { method: 'POST', body: formData });
-
-    alert('Sub Category Added (Check console for data)');
-    // Optionally reset form
-    setSelectedFile(null);
-    setPreviewUrl(null);
-    setParentCategory('');
-    setCategoryName('');
-    setOrder('');
+      }
+    })
   };
+  let apibaseurl = import.meta.env.VITE_APIBASEURL
+  let getParantCateory =  () => {
+      axios.get(`${apibaseurl}subcategory/parant`)
+      .then((res)=> res.data)
+      .then((finalRes)=>{
+        setParant(finalRes.data)
+      })
+  }
 
+  useEffect(() => {
+    getParantCateory()
+  }, [])
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto my-8">
       {/* Header */}
@@ -109,6 +108,7 @@ function AddSubCategoryForm() {
             >
               <input
                 type="file"
+                name='image'
                 ref={fileInputRef}
                 className="hidden"
                 accept="image/*" // Only accept image files
@@ -134,16 +134,20 @@ function AddSubCategoryForm() {
             <div>
               <label htmlFor="parentCategory" className="text-gray-700 font-medium block mb-1">Parent Category Name</label>
               <select
-                id="parentCategory"
+                name='parant'
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 value={parentCategory}
                 onChange={(e) => setParentCategory(e.target.value)}
               >
                 <option value="">Select Category</option>
                 {/* Dummy options - replace with dynamic data */}
-                <option value="electronics">Electronics</option>
-                <option value="clothing">Clothing</option>
-                <option value="homegoods">Home Goods</option>
+                {
+                parant.map((obj,index)=>{
+                  return(
+                    <option value={obj._id} key="index">{obj.name}</option>
+                  )
+                })
+              }
               </select>
             </div>
 
@@ -152,6 +156,7 @@ function AddSubCategoryForm() {
               <label htmlFor="categoryName" className="text-gray-700 font-medium block mb-1">Category Name</label>
               <input
                 type="text"
+                name='name'
                 id="categoryName"
                 placeholder="Category Name"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -165,7 +170,7 @@ function AddSubCategoryForm() {
               <label htmlFor="order" className="text-gray-700 font-medium block mb-1">Order</label>
               <input
                 type="number"
-                id="order"
+                name="order"
                 placeholder="Category Order"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                 value={order}

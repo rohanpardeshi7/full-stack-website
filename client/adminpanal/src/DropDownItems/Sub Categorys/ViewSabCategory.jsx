@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { IoFilter, IoPencil, IoSearch } from 'react-icons/io5';
 
 function SubCategoryTable() {
@@ -17,6 +18,28 @@ function SubCategoryTable() {
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
+
+  const [data, setData] = useState([]);
+    const [ids, setIds] = useState([]);
+    const [path, setPath] = useState("")
+  
+    let apibaseurl = import.meta.env.VITE_APIBASEURL;
+  
+    let getSubCategory = () => {
+      axios.get(`${apibaseurl}subcategory/view`)
+        .then((res) => res.data)
+        .then((finalRes) => {
+          if (finalRes.status) {
+            setData(Array.isArray(finalRes.data) ? finalRes.data : []);
+            setPath(finalRes.path)
+          }
+        })
+        .catch((err) => console.error("Error fetching categories:", err));
+    };
+  
+    useEffect(() => {
+      getSubCategory();
+    }, []);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -84,21 +107,21 @@ function SubCategoryTable() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredSubCategories.map((subCategory) => (
+            {data.map((subCategory) => (
               <tr key={subCategory.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600 rounded" />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {subCategory.parentCategoryName}
+                  {subCategory.parant.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {subCategory.subCategoryName}
+                  {subCategory.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <img
-                    src={subCategory.imageUrl}
-                    alt={`${subCategory.subCategoryName} image`}
+                    src={path + subCategory.image}
+                    alt={`${subCategory.name} image`}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 </td>

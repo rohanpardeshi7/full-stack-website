@@ -23,6 +23,8 @@ categoryRoute.post("/create",upload.single('image'), categoryController.create )
 categoryRoute.get("/view",categoryController.view)
 
 
+
+
 // categoryRoute.put("/update")
 
 

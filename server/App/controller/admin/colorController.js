@@ -13,22 +13,34 @@ let colorController = {
 
 
         try {
-            let checkSameColor = await colorModel.findOne({ name })
+            let CheckExist = await colorModel.findOne({
 
-            if (checkSameColor) {
-                res.send({
+                $or:[
+                    {name:name},
+                    {order:order}
+                ]
+            })
+
+            if (CheckExist) {
+                let errorObj = {}
+                if(CheckExist.name === name){
+                    errorObj.name = "Color Name Already Exist"
+                }
+                if(CheckExist.order == order){
+                    errorObj.order = "Order Number Already Exist"
+                }
+               return res.send({
                     status: 0,
                     message: "Color error",
-                    error: {
-                        name: "Color Name Already Exist..."
-                    }
+                    error: errorObj
                 })
             } else {
                 let colorRes = await colorModel.create(insertObj)
                 let obj = {
                     status: true,
                     massage: "color Added",
-                    colorRes
+                    colorRes,
+                   
                 }
                 res.send(obj)
             }
