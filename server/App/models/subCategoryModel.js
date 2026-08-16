@@ -4,7 +4,7 @@ let subCategorySchema = mongoose.Schema({
     name:{
         type:String,
         required:[true,"please fill the name"],
-        minLength:[2,"Sub ategory name must be at least 3 characters long"],
+        minLength:[2,"Sub Category name must be at least 3 characters long"],
         maxLength:[20,"Sub Category name cannot exceed 20 characters"]
     },
     parant:{
@@ -27,6 +27,6 @@ let subCategorySchema = mongoose.Schema({
 
 })
 
-let subCategoryModel = mongoose.model("subcategory",subCategorySchema)
+let subCategoryModel = mongoose.model("subCategory",subCategorySchema)
 
 module.exports = subCategoryModel

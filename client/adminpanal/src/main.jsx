@@ -33,6 +33,7 @@ import AddFaq from "./DropDownItems/Faqs/AddFaq.jsx";
 import ViewFaq from "./DropDownItems/Faqs/ViewFaq.jsx";
 import Profile from "./Common/Profile/Profile.jsx";
 import CompanyProfile from "./Common/Profile/CompanyProfile.jsx";
+import ProductDetails from "./DropDownItems/Products/ProductDetails.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -61,6 +62,9 @@ createRoot(document.getElementById("root")).render(
           />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/view-product" element={<ViewProduct />} />
+          <Route path="/product-details/:id" element={<ProductDetails />} />
+
+
           <Route path="/add-why-choose-us" element={<WhyChooseUs />} />
           <Route path="/view-why-choose-us" element={<ViewWhyChooseUs />} />
           <Route path="add-order" element={<AddOrder />} />

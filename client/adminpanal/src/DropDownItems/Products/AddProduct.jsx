@@ -1,21 +1,23 @@
-import React, { useState, useRef } from 'react';
+import axios from 'axios';
+import React, { useState, useRef, useEffect } from 'react';
 
 function AddProductForm() {
   // State for image uploads
   const [productImage, setProductImage] = useState(null);
-  const [bulkImage, setBulkImage] = useState(null);
-  const [galleryImages, setGalleryImages] = useState([]); // Array for multiple gallery images
+  const [backimage, setbackimage] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([]);
 
   const productImageRef = useRef(null);
-  const bulkImageRef = useRef(null);
+  const backimageRef = useRef(null);
   const galleryImagesRef = useRef(null);
 
-  // State for form fields
+  // Form Field Input States (Selected String Values)
   const [productName, setProductName] = useState('');
   const [parentCategory, setParentCategory] = useState('');
   const [subCategory, setSubCategory] = useState('');
-  const [material, setMaterial] = useState('');
-  const [color, setColor] = useState('');
+  const [subSubCategory, setSubSubCategory] = useState('');
+  const [material, setMaterial] = useState(''); // 💡 Selected Material ID
+  const [color, setColor] = useState('');       // 💡 Selected Color ID
   const [productType, setProductType] = useState('');
   const [isBestSelling, setIsBestSelling] = useState('');
   const [isUpSell, setIsUpSell] = useState('');
@@ -25,7 +27,146 @@ function AddProductForm() {
   const [order, setOrder] = useState('');
   const [description, setDescription] = useState('');
 
-  // --- Generic Drag and Drop / File Input Handlers ---
+  // Dropdown Lists Data States (Always Arrays)
+  const [parant, setParant] = useState([]);
+  const [subCategoryList, setSubCategoryList] = useState([]);
+  const [subSubcategoryList, setSubSubcategoryList] = useState([]);
+  const [colorList, setColorList] = useState([]);       // 💡 Array for Color Options
+  const [materialList, setMaterialList] = useState([]); // 💡 Array for Material Options
+
+  let apibaseurl = import.meta.env.VITE_APIBASEURL;
+
+  // --- API Handlers ---
+  let getColor = () => {
+    axios.get(`${apibaseurl}product/color`)
+      .then((res) => res.data)
+      .then((finalRes) => {
+        if (finalRes.status && Array.isArray(finalRes.data)) {
+          setColorList(finalRes.data);
+        } else {
+          setColorList([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Color fetch error:", err);
+        setColorList([]);
+      });
+  };
+
+  let getMaterial = () => {
+    axios.get(`${apibaseurl}product/material`)
+      .then((res) => res.data)
+      .then((finalRes) => {
+        if (finalRes.status && Array.isArray(finalRes.data)) {
+          setMaterialList(finalRes.data);
+        } else {
+          setMaterialList([]);
+        }
+      })
+      .catch((err) => {
+        console.error("Material fetch error:", err);
+        setMaterialList([]);
+      });
+  };
+
+  let getParantCateory = () => {
+    axios.get(`${apibaseurl}product/parant`)
+      .then((res) => res.data)
+      .then((finalRes) => {
+        if (finalRes.status && Array.isArray(finalRes.data)) {
+          setParant(finalRes.data);
+        }
+      })
+      .catch((err) => console.error("Parent category fetch error:", err));
+  };
+
+  let getSubCategory = (parantID) => {
+    if (!parantID) {
+      setSubCategoryList([]);
+      setSubSubcategoryList([]);
+      return;
+    }
+    axios.get(`${apibaseurl}product/subCategory/${parantID}`)
+      .then((res) => res.data)
+      .then((finalRes) => {
+        if (finalRes.status && Array.isArray(finalRes.data)) {
+          setSubCategoryList(finalRes.data);
+        } else {
+          setSubCategoryList([]);
+        }
+      })
+      .catch((err) => {
+        console.error("SubCategory fetch error:", err);
+        setSubCategoryList([]);
+      });
+  };
+
+  let getSubSubCategory = (subCategoryID) => {
+    if (!subCategoryID) {
+      setSubSubcategoryList([]);
+      return;
+    }
+    axios.get(`${apibaseurl}product/subSubCategory/${subCategoryID}`)
+      .then((res) => res.data)
+      .then((finalRes) => {
+        if (finalRes.status && Array.isArray(finalRes.data)) {
+          setSubSubcategoryList(finalRes.data);
+        } else {
+          setSubSubcategoryList([]);
+        }
+      })
+      .catch((err) => {
+        console.error("SubSubCategory fetch error:", err);
+        setSubSubcategoryList([]);
+      });
+  };
+
+  let saveProduct = (event) => {
+    event.preventDefault();
+    let formData = new FormData(event.target);
+
+    if (productImage) formData.set('image', productImage);
+    if (backimage) formData.set('backImage', backimage);
+
+    axios.post(`${apibaseurl}product/create`, formData)
+      .then((res) => res.data)
+      .then((finalRes) => {
+        if (finalRes.status) {
+          alert(finalRes.message || 'Product Created Successfully');
+          setProductName('');
+          setParentCategory('');
+          setSubCategory('');
+          setSubSubCategory('');
+          setMaterial('');
+          setColor('');
+          setProductType('');
+          setIsBestSelling('');
+          setIsUpSell('');
+          setActualPrice('');
+          setSalePrice('');
+          setTotalInStocks('');
+          setOrder('');
+          setDescription('');
+          setProductImage(null);
+          setbackimage(null);
+          setGalleryImages([]);
+        } else {
+          alert(finalRes.message || 'Failed to create product');
+        }
+      })
+      .catch((err) => {
+        console.error('Submit error:', err);
+        alert(err.response?.data?.message || 'Server error occurred');
+      });
+  };
+
+  useEffect(() => {
+    getParantCateory();
+    getColor();
+    getMaterial();
+  }, []);
+
+  // --- Drag and Drop Handlers ---
   const handleDragOver = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -46,13 +187,13 @@ function AddProductForm() {
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
       if (isMultiple) {
-        const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-        setter(prev => [...prev, ...imageFiles]);
+        const imageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+        setter((prev) => [...prev, ...imageFiles]);
       } else {
         if (files[0].type.startsWith('image/')) {
           setter(files[0]);
         } else {
-          alert('Please upload an image file (e.g., .jpg, .png, .gif).');
+          alert('Please upload an image file.');
         }
       }
     }
@@ -62,13 +203,13 @@ function AddProductForm() {
     const files = event.target.files;
     if (files && files.length > 0) {
       if (isMultiple) {
-        const imageFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
-        setter(prev => [...prev, ...imageFiles]);
+        const imageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
+        setter((prev) => [...prev, ...imageFiles]);
       } else {
         if (files[0].type.startsWith('image/')) {
           setter(files[0]);
         } else {
-          alert('Please upload an image file (e.g., .jpg, .png, .gif).');
+          alert('Please upload an image file.');
         }
       }
     }
@@ -76,86 +217,7 @@ function AddProductForm() {
 
   const getPreviewUrl = (file) => (file ? URL.createObjectURL(file) : null);
 
-  // --- Form Submission ---
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // Build FormData
-    const formData = new FormData();
-    if (productImage) formData.append('productImage', productImage);
-    if (bulkImage) formData.append('bulkImage', bulkImage);
-    // Append gallery images as array-like keys
-    galleryImages.forEach((file, index) => {
-      formData.append('galleryImages[]', file);
-    });
-
-    formData.append('productName', productName);
-    formData.append('parentCategory', parentCategory);
-    formData.append('subCategory', subCategory);
-    formData.append('material', material);
-    formData.append('color', color);
-    formData.append('productType', productType);
-    formData.append('isBestSelling', isBestSelling);
-    formData.append('isUpSell', isUpSell);
-    formData.append('actualPrice', actualPrice);
-    formData.append('salePrice', salePrice);
-    formData.append('totalInStocks', totalInStocks);
-    formData.append('order', order);
-    formData.append('description', description);
-
-    console.log('Submitting Product Data:', {
-      productImage: productImage ? productImage.name : 'N/A',
-      bulkImage: bulkImage ? bulkImage.name : 'N/A',
-      galleryImages: galleryImages.map(f => f.name),
-      productName, parentCategory, subCategory, material, color, productType,
-      isBestSelling, isUpSell, actualPrice, salePrice, totalInStocks, order, description
-    });
-
-    try {
-      // Use the form's action as endpoint (fallback to /api/products)
-      const endpoint = event.target.action || '/api/products';
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        body: formData, // Do NOT set Content-Type; browser will add proper boundary
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error('Server error:', res.status, text);
-        alert(`Error: ${res.status} - ${text}`);
-        return;
-      }
-
-      const data = await res.json().catch(() => null);
-      alert('Product Created Successfully');
-      console.log('Server response:', data);
-
-      // Optionally reset form fields after success
-      setProductImage(null);
-      setBulkImage(null);
-      setGalleryImages([]);
-      setProductName('');
-      setParentCategory('');
-      setSubCategory('');
-      setMaterial('');
-      setColor('');
-      setProductType('');
-      setIsBestSelling('');
-      setIsUpSell('');
-      setActualPrice('');
-      setSalePrice('');
-      setTotalInStocks('');
-      setOrder('');
-      setDescription('');
-    } catch (err) {
-      console.error('Submit error:', err);
-      alert('An error occurred while submitting the form.');
-    }
-  };
-
-  // Helper for generic drag-drop section
-  const DragDropArea = ({ label, file, setter, inputRef, isMultiple = false, files = [] }) => (
+  const DragDropArea = ({ label, file, setter, inputRef, isMultiple = false, files = [], name }) => (
     <div className="flex flex-col space-y-2">
       <label className="text-gray-700 font-medium">{label}</label>
       <div
@@ -168,24 +230,24 @@ function AddProductForm() {
         <input
           type="file"
           ref={inputRef}
-          name={label === 'Product Image' ? 'productImage' : label === 'Bulk Image' ? 'bulkImage' : 'galleryImages[]'}
+          name={name}
           className="hidden"
           accept="image/*"
           multiple={isMultiple}
           onChange={(e) => handleFileChange(e, setter, isMultiple)}
         />
-        {(isMultiple && files.length > 0) ? (
+        {isMultiple && files.length > 0 ? (
           <div className="flex flex-wrap justify-center p-2">
             {files.map((f, index) => (
               <img key={index} src={getPreviewUrl(f)} alt={`Preview ${index}`} className="h-16 w-16 object-contain m-1 rounded" />
             ))}
-            <p className="mt-2 text-sm text-gray-500">+{files.length} images</p>
+            <p className="mt-2 text-sm text-gray-500 w-full text-center">+{files.length} images</p>
           </div>
-        ) : (file && !isMultiple) ? (
+        ) : file && !isMultiple ? (
           <img src={getPreviewUrl(file)} alt="Preview" className="max-h-full max-w-full object-contain p-2" />
         ) : (
           <>
-            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
             </svg>
             <p className="mt-2 text-sm text-gray-500">Drag and drop</p>
@@ -197,42 +259,118 @@ function AddProductForm() {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-7xl mx-auto my-8">
-      {/* Header */}
       <div className="mb-6 pb-4 border-b border-gray-200">
         <h2 className="text-2xl font-semibold text-gray-800">Add Product</h2>
       </div>
 
-      {/* IMPORTANT: action, method and encType provided for backend/native submit support.
-          If you rely on JavaScript fetch, fetch will use the same endpoint (event.target.action). */}
-      <form
-        onSubmit={handleSubmit}
-        action="/api/products"
-        method="POST"
-        encType="multipart/form-data"
-      >
+      <form onSubmit={saveProduct}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Image Uploads */}
-          <div className="col-span-1 flex flex-col space-y-6">
-            <DragDropArea
-              label="Product Image"
-              file={productImage}
-              setter={setProductImage}
-              inputRef={productImageRef}
-            />
-            <DragDropArea
-              label="Bulk Image"
-              file={bulkImage}
-              setter={setBulkImage}
-              inputRef={bulkImageRef}
-            />
-            <DragDropArea
-              label="Gallery Image"
-              files={galleryImages}
-              setter={setGalleryImages}
-              inputRef={galleryImagesRef}
-              isMultiple={true}
+          <div className="col-span-1 flex flex-col space-y-6 bg-gray-50 p-5 rounded-xl border border-gray-200">
+  
+  {/* 1. Main Product Image (Front) */}
+  <div className="flex flex-col space-y-2">
+    <label className="text-sm font-semibold text-gray-700">
+      Product Image (Front) <span className="text-red-500">*</span>
+    </label>
+    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 hover:border-blue-400 transition-all">
+      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+        <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <p className="text-xs text-gray-500 font-medium">Click to upload Front Image</p>
+      </div>
+      <input 
+        type="file" 
+        name="image" 
+        accept="image/*" 
+        className="hidden" 
+        onChange={(e) => setProductImage(e.target.files[0])} 
+        required 
+      />
+    </label>
+    {productImage && (
+      <div className="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200">
+        <img 
+          src={URL.createObjectURL(productImage)} 
+          alt="Front Preview" 
+          className="h-12 w-12 rounded object-cover border"
+        />
+        <span className="text-xs text-gray-600 truncate flex-1 font-medium">{productImage.name}</span>
+      </div>
+    )}
+  </div>
+
+  {/* 2. Back Image */}
+  <div className="flex flex-col space-y-2">
+    <label className="text-sm font-semibold text-gray-700">
+      Back Image
+    </label>
+    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 hover:border-blue-400 transition-all">
+      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+        <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <p className="text-xs text-gray-500 font-medium">Click to upload Back Image</p>
+      </div>
+      <input 
+        type="file" 
+        name="backImage" 
+        accept="image/*" 
+        className="hidden" 
+        onChange={(e) => setbackimage(e.target.files[0])} 
+      />
+    </label>
+    {backimage && (
+      <div className="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200">
+        <img 
+          src={URL.createObjectURL(backimage)} 
+          alt="Back Preview" 
+          className="h-12 w-12 rounded object-cover border"
+        />
+        <span className="text-xs text-gray-600 truncate flex-1 font-medium">{backimage.name}</span>
+      </div>
+    )}
+  </div>
+
+  {/* 3. Gallery Images (Multiple) */}
+  <div className="flex flex-col space-y-2">
+    <label className="text-sm font-semibold text-gray-700">
+      Gallery Images (Multiple)
+    </label>
+    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer bg-white hover:bg-gray-50 hover:border-blue-400 transition-all">
+      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+        <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+        <p className="text-xs text-gray-500 font-medium">Select multiple images</p>
+      </div>
+      <input 
+        type="file" 
+        name="gallery" 
+        accept="image/*" 
+        multiple 
+        className="hidden" 
+        onChange={(e) => setGalleryImages(Array.from(e.target.files))} 
+      />
+    </label>
+    
+    {galleryImages.length > 0 && (
+      <div className="grid grid-cols-4 gap-2 pt-2">
+        {galleryImages.map((file, index) => (
+          <div key={index} className="relative h-14 w-full rounded-md overflow-hidden border border-gray-200 bg-white">
+            <img 
+              src={URL.createObjectURL(file)} 
+              alt={`Gallery ${index}`} 
+              className="h-full w-full object-cover"
             />
           </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+</div>
 
           {/* Right Columns: Form Fields */}
           <div className="col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -242,11 +380,12 @@ function AddProductForm() {
               <input
                 type="text"
                 id="productName"
-                name="productName"
+                name="name"
                 placeholder="Product Name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
+                required
               />
             </div>
 
@@ -255,14 +394,23 @@ function AddProductForm() {
               <label htmlFor="parentCategory" className="text-gray-700 font-medium block mb-1">Select Parent Category</label>
               <select
                 id="parentCategory"
-                name="parentCategory"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                name="parant"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={parentCategory}
-                onChange={(e) => setParentCategory(e.target.value)}
+                onChange={(e) => {
+                  const pId = e.target.value;
+                  setParentCategory(pId);
+                  setSubCategory('');
+                  setSubSubCategory('');
+                  setSubSubcategoryList([]);
+                  getSubCategory(pId);
+                }}
+                required
               >
                 <option value="">Nothing Selected</option>
-                <option value="cat1">Category 1</option>
-                <option value="cat2">Category 2</option>
+                {parant.map((obj) => (
+                  <option value={obj._id} key={obj._id}>{obj.name}</option>
+                ))}
               </select>
             </div>
 
@@ -272,13 +420,37 @@ function AddProductForm() {
               <select
                 id="subCategory"
                 name="subCategory"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={subCategory}
-                onChange={(e) => setSubCategory(e.target.value)}
+                onChange={(e) => {
+                  const subId = e.target.value;
+                  setSubCategory(subId);
+                  setSubSubCategory('');
+                  getSubSubCategory(subId);
+                }}
+                required
               >
                 <option value="">Select Sub Category</option>
-                <option value="subcat1">Sub Category A</option>
-                <option value="subcat2">Sub Category B</option>
+                {subCategoryList.map((obj) => (
+                  <option value={obj._id} key={obj._id}>{obj.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Select Sub Sub Category */}
+            <div>
+              <label htmlFor="subSubCategory" className="text-gray-700 font-medium block mb-1">Select Sub Sub Category</label>
+              <select
+                id="subSubCategory"
+                name="subSubCategory"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={subSubCategory}
+                onChange={(e) => setSubSubCategory(e.target.value)}
+              >
+                <option value="">Select Sub Sub Category</option>
+                {subSubcategoryList.map((obj) => (
+                  <option value={obj._id} key={obj._id}>{obj.name}</option>
+                ))}
               </select>
             </div>
 
@@ -287,14 +459,15 @@ function AddProductForm() {
               <label htmlFor="material" className="text-gray-700 font-medium block mb-1">Select Material</label>
               <select
                 id="material"
-                name="material"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                name="materials"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={material}
                 onChange={(e) => setMaterial(e.target.value)}
               >
                 <option value="">Nothing Selected</option>
-                <option value="cotton">Cotton</option>
-                <option value="leather">Leather</option>
+                {materialList.map((obj) => (
+                  <option value={obj._id} key={obj._id}>{obj.name}</option>
+                ))}
               </select>
             </div>
 
@@ -303,14 +476,15 @@ function AddProductForm() {
               <label htmlFor="color" className="text-gray-700 font-medium block mb-1">Select Color</label>
               <select
                 id="color"
-                name="color"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                name="colors"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
               >
                 <option value="">Nothing Selected</option>
-                <option value="red">Red</option>
-                <option value="blue">Blue</option>
+                {colorList.map((obj) => (
+                  <option value={obj._id} key={obj._id}>{obj.name}</option>
+                ))}
               </select>
             </div>
 
@@ -320,13 +494,14 @@ function AddProductForm() {
               <select
                 id="productType"
                 name="productType"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={productType}
                 onChange={(e) => setProductType(e.target.value)}
               >
                 <option value="">Nothing Selected</option>
-                <option value="electronic">Electronic</option>
-                <option value="apparel">Apparel</option>
+                <option value="Features">Features</option>
+                <option value="New Arrivals">New Arrivals</option>
+                <option value="On Sale">On Sale</option>
               </select>
             </div>
 
@@ -335,14 +510,14 @@ function AddProductForm() {
               <label htmlFor="isBestSelling" className="text-gray-700 font-medium block mb-1">Is Best Selling</label>
               <select
                 id="isBestSelling"
-                name="isBestSelling"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                name="bestSelling"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={isBestSelling}
                 onChange={(e) => setIsBestSelling(e.target.value)}
               >
                 <option value="">Nothing Selected</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
               </select>
             </div>
 
@@ -351,14 +526,14 @@ function AddProductForm() {
               <label htmlFor="isUpSell" className="text-gray-700 font-medium block mb-1">Is UpSell</label>
               <select
                 id="isUpSell"
-                name="isUpSell"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                name="upSale"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={isUpSell}
                 onChange={(e) => setIsUpSell(e.target.value)}
               >
                 <option value="">Nothing Selected</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
               </select>
             </div>
 
@@ -370,9 +545,10 @@ function AddProductForm() {
                 id="actualPrice"
                 name="actualPrice"
                 placeholder="Actual Price"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={actualPrice}
                 onChange={(e) => setActualPrice(e.target.value)}
+                required
               />
             </div>
 
@@ -384,7 +560,7 @@ function AddProductForm() {
                 id="salePrice"
                 name="salePrice"
                 placeholder="Sale Price"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={salePrice}
                 onChange={(e) => setSalePrice(e.target.value)}
               />
@@ -396,11 +572,12 @@ function AddProductForm() {
               <input
                 type="number"
                 id="totalInStocks"
-                name="totalInStocks"
+                name="stock"
                 placeholder="Total In Stocks"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={totalInStocks}
                 onChange={(e) => setTotalInStocks(e.target.value)}
+                required
               />
             </div>
 
@@ -412,9 +589,10 @@ function AddProductForm() {
                 id="order"
                 name="order"
                 placeholder="Order"
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={order}
                 onChange={(e) => setOrder(e.target.value)}
+                required
               />
             </div>
           </div>
@@ -423,33 +601,22 @@ function AddProductForm() {
         {/* Description Section */}
         <div className="mt-6">
           <label htmlFor="description" className="text-gray-700 font-medium block mb-1">Description</label>
-          <div className="border border-gray-300 rounded-md overflow-hidden">
-            {/* Rich Text Editor Toolbar (Simulated) */}
-            <div className="bg-gray-100 flex items-center p-2 space-x-2 border-b border-gray-300">
-              <span className="text-sm font-semibold text-gray-700">Normal</span>
-              <button type="button" className="p-1 rounded hover:bg-gray-200 text-gray-700 font-bold">B</button>
-              <button type="button" className="p-1 rounded hover:bg-gray-200 text-gray-700 italic">I</button>
-              <button type="button" className="p-1 rounded hover:bg-gray-200 text-gray-700 underline">U</button>
-              <button type="button" className="p-1 rounded hover:bg-gray-200 text-gray-700">%</button>
-            </div>
-            {/* Textarea for Description */}
-            <textarea
-              id="description"
-              name="description"
-              rows="8"
-              placeholder="Product Description"
-              className="w-full p-3 resize-y focus:outline-none"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-          </div>
+          <textarea
+            id="description"
+            name="description"
+            rows="5"
+            placeholder="Product Description"
+            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          ></textarea>
         </div>
 
-        {/* Create Product Button */}
+        {/* Submit Button */}
         <div className="mt-8">
           <button
             type="submit"
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition-colors duration-200 cursor-pointer"
           >
             Create Product
           </button>

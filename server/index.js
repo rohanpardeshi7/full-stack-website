@@ -15,6 +15,9 @@ app.use(express.json());
 app.use("/admin", adminRoutes);
 app.use("/uploads/category",express.static("uploads/category"))
 app.use("/uploads/subCategory",express.static("uploads/subCategory"))
+app.use("/uploads/subSubCategory",express.static("uploads/subSubCategory"))
+app.use("/uploads/product",express.static("uploads/product"))
+
 
 
 app.listen(process.env.PORT, async () => {
