@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { IoTrash, IoPencil, IoInformationCircleOutline, IoClose } from 'react-icons/io5';
+import { Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 function ProductItemsTable() {
   const [data, setData] = useState([]);
@@ -21,6 +23,8 @@ function ProductItemsTable() {
       })
       .catch((err) => console.error("Error fetching products:", err));
   };
+
+  
 
   useEffect(() => {
     getProduct();
@@ -135,12 +139,14 @@ function ProductItemsTable() {
                 {/* Action Buttons */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
                   <div className="flex items-center justify-center space-x-3">
+                    <Link to={`/edit-product/${product._id}`}>
                     <button 
                       title="Edit"
                       className="p-1 text-yellow-600 hover:text-yellow-900 hover:bg-yellow-50 rounded transition-colors"
                     >
                       <IoPencil className="text-lg" />
                     </button>
+                    </Link>
                     <button 
                       title="Delete"
                       className="p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"

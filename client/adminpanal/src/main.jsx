@@ -62,6 +62,7 @@ createRoot(document.getElementById("root")).render(
           />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/view-product" element={<ViewProduct />} />
+          <Route path="/edit-product/:id" element={<AddProduct />} />
           <Route path="/product-details/:id" element={<ProductDetails />} />
 
 

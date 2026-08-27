@@ -118,28 +118,46 @@ let productController = {
       });
     }
   },
-  details:(req,res) => {
-    let {id} = req.params
-    let data = await productModel
-        .findOne({_id:id})
+  details: async (req, res) => {
+    try {
+      let { id } = req.params;
+  
+      let data = await productModel
+        .findOne({ _id: id })
         .populate('parant', 'name')
         .populate('subCategory', 'name')
         .populate('subSubCategory', 'name')
         .populate('colors', 'name')
-        .populate('materials', 'name')
-        .sort({ order: 1 });
-
+        .populate('materials', 'name');
+  
+      if (!data) {
+        return res.status(404).json({
+          status: false,
+          message: "Product not found"
+        });
+      }
+  
       let basePath = process.env.PRODUCTSTATICPATH || "http://localhost:8000/uploads/product/";
       if (!basePath.endsWith("/")) {
         basePath += "/";
       }
-
+  
       let obj = {
         status: true,
         path: basePath,
         message: "Product found",
         data
       };
+  
+      return res.status(200).json(obj);
+  
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        message: "Error fetching product details",
+        error: err.message
+      });
+    }
   },
   parant: async (req, res) => {
     try {
@@ -205,6 +223,71 @@ let productController = {
       });
     } catch (err) {
       return res.status(500).json({ status: false, error: err.message });
+    }
+  },
+  update: async (req, res) => {
+    try {
+      let { id } = req.params;
+      let updateObj = { ...req.body };
+  
+      // 1. Agar nayi front image aayi ho
+      if (req.files && req.files.image && req.files.image[0]) {
+        updateObj['image'] = req.files.image[0].filename;
+      }
+  
+      // 2. Agar nayi back image aayi ho
+      if (req.files && req.files.backImage && req.files.backImage[0]) {
+        updateObj['backImage'] = req.files.backImage[0].filename;
+      }
+  
+      // 3. Agar nayi gallery images aayi hon
+      if (req.files && req.files.gallery && req.files.gallery.length > 0) {
+        updateObj['gallery'] = req.files.gallery.map((obj) => obj.filename);
+      }
+  
+      // 4. Duplicate Check (Apni ID chhod kar doosre product se match check karna)
+      let checkProduct = await productModel.findOne({
+        _id: { $ne: id }, // 💡 Current product ko exclude karein
+        $or: [
+          { name: updateObj.name },
+          { order: Number(updateObj.order) }
+        ]
+      });
+  
+      if (checkProduct) {
+        let errorObj = {};
+        if (checkProduct.name && updateObj.name && checkProduct.name.toLowerCase() === updateObj.name.toLowerCase()) {
+          errorObj.name = "Product Name Already Exists";
+        }
+        if (checkProduct.order === Number(updateObj.order)) {
+          errorObj.order = "Product Order Number Already Exists";
+        }
+        return res.status(400).json({
+          status: false,
+          message: "Duplicate Product Error",
+          error: errorObj
+        });
+      }
+  
+      // 5. Update in Database
+      let updatedProduct = await productModel.findByIdAndUpdate(
+        id,
+        { $set: updateObj },
+        { new: true }
+      );
+  
+      return res.status(200).json({
+        status: true,
+        message: "Product Updated Successfully",
+        data: updatedProduct
+      });
+  
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        message: "Internal Server Error",
+        error: err.message
+      });
     }
   }
 };
