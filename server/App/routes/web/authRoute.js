@@ -13,13 +13,19 @@ let storage = multer.diskStorage({
     }
 })
 
+
+//before login routes
 userRoutes.post("/register",authController.register)
 userRoutes.post("/login",authController.login)
+userRoutes.post("/forgot-password",authController.forgotPassword)
+userRoutes.get("/verify-reset-token/:token", authController.verifyResetToken);
 
 
 //afetr login routes
 let upload = multer({storage})
 userRoutes.post("/change-Password",authController.changePassword)
+
+
 userRoutes.post("/update-profile", upload.single('image'), authController.updateProfile)
 
 

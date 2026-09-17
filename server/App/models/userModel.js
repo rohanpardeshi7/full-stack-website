@@ -18,7 +18,15 @@ let userSchema = mongoose.Schema({
     },
     image:{
         type:String
-    }
+    },
+    resetToken:{
+        type: String,
+        default: null
+    },
+    resetTokenExpire:{
+        type: Date,
+        default: null
+    },
 })
 
 let userModel = mongoose.model("user",userSchema)
