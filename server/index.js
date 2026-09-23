@@ -1,8 +1,11 @@
-let express = require("express");
+const express = require("express");
 const adminRoutes = require("./App/routes/adminRoutes");
 const dbConnection = require("./App/config/dbConnection");
-let cors = require('cors');
+const cors = require('cors');
 const webRoutes = require("./App/routes/webRoutes");
+const adminModel = require("./App/models/adminModel");
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 require("dotenv").config();
 let app = express();
 
@@ -26,4 +29,19 @@ app.use("/uploads/product",express.static("uploads/product"))
 app.listen(process.env.PORT, async () => {
     await dbConnection();
     console.log(`🚀 Server running on port ${process.env.PORT}`);
+    let checkData = await adminModel.findOne()
+
+    const hash = bcrypt.hashSync(process.env.ADMINPASSWORD, saltRounds);
+
+    if(!checkData){
+        adminModel.create(
+            {
+                email:process.env.ADMINMAIL,
+                password:hash
+            }
+        )
+    }
+
+
+
 });

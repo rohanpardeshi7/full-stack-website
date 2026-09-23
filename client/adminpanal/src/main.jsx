@@ -34,20 +34,33 @@ import ViewFaq from "./DropDownItems/Faqs/ViewFaq.jsx";
 import Profile from "./Common/Profile/Profile.jsx";
 import CompanyProfile from "./Common/Profile/CompanyProfile.jsx";
 import ProductDetails from "./DropDownItems/Products/ProductDetails.jsx";
+import ForgotPassword from "./forgot-password.jsx";
+
+// 404 Not Found Page Component (Agar alag file nahi hai toh)
+const PageNotFound = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen text-gray-700">
+    <h1 className="text-4xl font-bold mb-2">404</h1>
+    <p>Page Not Found</p>
+  </div>
+);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* 1. Login Page */}
         <Route path="/" element={<Login />} />
-        <Route path="/" element={<MainLayOut />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="forgot-password" element={<ForgotPassword/>} />
+
+        {/* 2. Admin Panel Layout & Protected Routes */}
+        <Route element={<MainLayOut />}>
           <Route path="/home" element={<Dashboard />} />
           <Route path="/view-user" element={<ViewUser />} />
           <Route path="/contact-enquirys" element={<ContactEnquiry />} />
           <Route path="/newslatters" element={<NewsLatter />} />
           <Route path="/add-color" element={<AddColor />} />
           <Route path="/edit-color/:id" element={<AddColor />} />
-
           <Route path="/view-color" element={<ViewColor />} />
           <Route path="/add-material" element={<AddMarerial />} />
           <Route path="/view-material" element={<ViewMaterial />} />
@@ -56,20 +69,15 @@ createRoot(document.getElementById("root")).render(
           <Route path="/add-sub-category" element={<AddSubCategory />} />
           <Route path="/view-sub-category" element={<ViewSabCategory />} />
           <Route path="/add-sub-sub-category" element={<AddSubSubCategory />} />
-          <Route
-            path="/view-sub-sub-category"
-            element={<ViewSubSubCategaory />}
-          />
+          <Route path="/view-sub-sub-category" element={<ViewSubSubCategaory />} />
           <Route path="/add-product" element={<AddProduct />} />
           <Route path="/view-product" element={<ViewProduct />} />
           <Route path="/edit-product/:id" element={<AddProduct />} />
           <Route path="/product-details/:id" element={<ProductDetails />} />
-
-
           <Route path="/add-why-choose-us" element={<WhyChooseUs />} />
           <Route path="/view-why-choose-us" element={<ViewWhyChooseUs />} />
-          <Route path="add-order" element={<AddOrder />} />
-          <Route path="add-slider" element={<AddSider />} />
+          <Route path="/add-order" element={<AddOrder />} />
+          <Route path="/add-slider" element={<AddSider />} />
           <Route path="/view-slider" element={<ViewSider />} />
           <Route path="/add-country" element={<AddCountry />} />
           <Route path="/view-country" element={<ViewCountry />} />
@@ -78,9 +86,12 @@ createRoot(document.getElementById("root")).render(
           <Route path="/add-faqs" element={<AddFaq />} />
           <Route path="/view-faqs" element={<ViewFaq />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path={"/company-profile"} element={<CompanyProfile/>}></Route>
+          <Route path="/company-profile" element={<CompanyProfile />} />
+          
         </Route>
-        <Route path="*" element={<Error />} />
+
+        {/* 3. Catch All 404 Route */}
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>

@@ -19,6 +19,8 @@ userRoutes.post("/register",authController.register)
 userRoutes.post("/login",authController.login)
 userRoutes.post("/forgot-password",authController.forgotPassword)
 userRoutes.get("/verify-reset-token/:token", authController.verifyResetToken);
+userRoutes.get("/verify-reset-token/:token", authController.verifyResetToken);
+userRoutes.post("/reset-password/:token", authController.resetPassword);
 
 
 //afetr login routes

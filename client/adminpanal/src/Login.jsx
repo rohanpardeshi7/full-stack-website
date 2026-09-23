@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,7 +15,6 @@ export default function Login() {
       return;
     }
 
-    // If validation passes
     setError("");
     navigate("/home");
   };
@@ -52,9 +51,12 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+
+            </div>
             <input
               type="password"
               placeholder="Enter Password"
@@ -63,7 +65,14 @@ export default function Login() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
+          <Link to='/forgot-password'>
+          <button
+            type="button"
+            className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium m-3"
+          >
+            Forgot Password?
+          </button>
+          </Link>
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200"
