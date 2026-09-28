@@ -1,15 +1,55 @@
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
-let adminSchema = mongoose.Schema({
-    name: String,
-    email: String,
-    password:String,
-    logo:String,
-    CompnyName:String,
-    officalEmail:String,
-    address:String,
-    mapURL:String
-})
+const adminSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      default: "",
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    logo: {
+      type: String,
+      default: "",
+    },
+    CompnyName: {
+      type: String,
+      default: "",
+    },
+    officalEmail: {
+      type: String,
+      default: "",
+    },
+    address: {
+      type: String,
+      default: "",
+    },
+    mapURL: {
+      type: String,
+      default: "",
+    },
+    otp: {
+        type: String,
+        default: null
+      },
+      otpExpires: {
+        type: Date,
+        default: null
+      }
+  },
+  {
+    timestamps: true, // isse createdAt aur updatedAt automatically add ho jayenge
+  }
+);
 
-let adminModel = mongoose.model('admin',adminSchema)
-module.exports = adminModel
+const adminModel = mongoose.model("admin", adminSchema);
+
+module.exports = adminModel;

@@ -2,6 +2,7 @@ import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import Login from "./Login.jsx";
 import MainLayOut from "./Common/MainLayOut.jsx";
 import Dashboard from "./Dashboard.jsx";
@@ -34,9 +35,12 @@ import ViewFaq from "./DropDownItems/Faqs/ViewFaq.jsx";
 import Profile from "./Common/Profile/Profile.jsx";
 import CompanyProfile from "./Common/Profile/CompanyProfile.jsx";
 import ProductDetails from "./DropDownItems/Products/ProductDetails.jsx";
-import ForgotPassword from "./forgot-password.jsx";
 
-// 404 Not Found Page Component (Agar alag file nahi hai toh)
+// Import paths ka casing apne file name ke hisaab se check kar lein
+import ForgotPassword from "./forgot-password.jsx";
+import ResetPassword from "./Reset-password.jsx";
+
+// 404 Component
 const PageNotFound = () => (
   <div className="flex flex-col items-center justify-center min-h-screen text-gray-700">
     <h1 className="text-4xl font-bold mb-2">404</h1>
@@ -48,10 +52,11 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        {/* 1. Login Page */}
+        {/* 1. Public Auth Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="forgot-password" element={<ForgotPassword/>} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* 2. Admin Panel Layout & Protected Routes */}
         <Route element={<MainLayOut />}>
@@ -87,7 +92,6 @@ createRoot(document.getElementById("root")).render(
           <Route path="/view-faqs" element={<ViewFaq />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/company-profile" element={<CompanyProfile />} />
-          
         </Route>
 
         {/* 3. Catch All 404 Route */}
