@@ -1,3 +1,4 @@
+const { createSlug } = require("../../config/helper");
 const materialModel = require("../../models/materialModel");
 
 let materialController = {
@@ -8,6 +9,7 @@ let materialController = {
             order
         };
         try {
+            insertObj['slug'] = createSlug(insertObj.name)
             let materialRes = await materialModel.create(insertObj);
             let obj = {
                 status: true,

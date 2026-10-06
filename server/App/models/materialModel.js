@@ -17,7 +17,8 @@ let materialSchema = mongoose.Schema( {
     date:{
         type:Date,
         default:Date.now
-    }
+    },
+    slug:String
 })
 
 let materialModel = mongoose.model("material",materialSchema)

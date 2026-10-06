@@ -60,6 +60,7 @@ let productSchema = mongoose.Schema(
         backImage:String, // BackImage
         gallery:[], //gallery image
         description:String,
+        slug:String,
         date:{
             type:Date,
             default:Date.now

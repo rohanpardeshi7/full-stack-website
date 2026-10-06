@@ -1,3 +1,4 @@
+const { createSlug } = require("../../config/helper");
 const categoryModel = require("../../models/categoryModel");
 const colorModel = require("../../models/colorModel");
 const materialModel = require("../../models/materialModel");
@@ -21,7 +22,7 @@ let productController = {
         insertObj['gallery'] = req.files.gallery.map((obj) => obj.filename);
       }
     }
-
+    insertObj['slug'] = createSlug(insertObj.name)
     try {
       // 1. Check if Name or Order already exists
       let checkProduct = await productModel.findOne({
@@ -244,6 +245,8 @@ let productController = {
       if (req.files && req.files.gallery && req.files.gallery.length > 0) {
         updateObj['gallery'] = req.files.gallery.map((obj) => obj.filename);
       }
+      updateObj['slug']  = createSlug(updateObj.name)
+
   
       // 4. Duplicate Check (Apni ID chhod kar doosre product se match check karna)
       let checkProduct = await productModel.findOne({

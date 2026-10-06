@@ -27,7 +27,8 @@ let subSubCategorySchema = mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
-    }
+    },
+    slug:String,
 });
 
 let subSubCategoryModel = mongoose.model("subSubcategory", subSubCategorySchema);

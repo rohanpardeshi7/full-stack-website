@@ -24,7 +24,8 @@ let colorSchema = mongoose.Schema( {
     date:{
         type:Date,
         default:Date.now
-    }
+    },
+    slug:String
 })
 
 let colorModel = mongoose.model("color",colorSchema)

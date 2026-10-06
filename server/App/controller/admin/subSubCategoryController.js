@@ -1,3 +1,4 @@
+const { createSlug } = require("../../config/helper");
 const categoryModel = require("../../models/categoryModel");
 const subCategoryModel = require("../../models/subCategoryModel"); 
 const subSubCategoryModel = require("../../models/subSubCategoryModel");
@@ -57,6 +58,7 @@ let subSubCategoryController = {
         }
     
         try {
+            insertobj['slug'] = createSlug(insertobj.name)
             //  Check duplicate ONLY within the same Parent & SubCategory
             let checkSubSubSameCategory = await subSubCategoryModel.findOne({
                 parant: parant,

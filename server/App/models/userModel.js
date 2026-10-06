@@ -27,6 +27,7 @@ let userSchema = mongoose.Schema({
         type: Date,
         default: null
     },
+    slug:String
 })
 
 let userModel = mongoose.model("user",userSchema)

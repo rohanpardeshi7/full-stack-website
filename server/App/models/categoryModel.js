@@ -19,7 +19,8 @@ let categorySchema = mongoose.Schema({
     date:{
         type:Date,
         default:Date.now
-    }
+    },
+    slug:String
 
 })
 

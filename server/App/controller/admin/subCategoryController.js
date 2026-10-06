@@ -1,3 +1,4 @@
+const { createSlug } = require("../../config/helper")
 const categoryModel = require("../../models/categoryModel")
 const subCategoryModel = require("../../models/subCategoryModel")
 
@@ -17,6 +18,7 @@ let subCategoryController = {
         }
         
         try {
+            insertobj['slug'] = createSlug(insertObj.name)
             let checkSubSameCategory = await subCategoryModel.findOne({
                 $or : [
                     {name:name},
