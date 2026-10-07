@@ -1,8 +1,8 @@
-let express = require('express')
-const cartController = require('../../controller/web/cartController')
- let cartRoute = express.Router()
+let express = require('express');
+const cartController = require('../../controller/web/cartController');
 
+const cartRoute = express.Router();
 
- cartRoute.post('/add-to-cart',cartController.addToCart)
+cartRoute.post('/add-to-cart', cartController.addToCart);
 
-module.exports = {cartRoute}
+module.exports = { cartRoute };
