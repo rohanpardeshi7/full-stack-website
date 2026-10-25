@@ -16,7 +16,7 @@ let categoryController = {
         }
         
         try {
-            insertObj['slug'] = createSlug(insertObj.name)
+            insertobj['slug'] = createSlug(insertobj.name)
             let checkSameCategory = await categoryModel.findOne({
                 $or : [
                     {name:name},

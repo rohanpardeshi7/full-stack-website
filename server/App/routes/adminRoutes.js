@@ -21,5 +21,4 @@ adminRoutes.use("/category", categoryRoute);
 adminRoutes.use("/subcategory", subCategoryRoute);
 adminRoutes.use("/subSubCategory", subCategoryRoute);
 adminRoutes.use("/product", productRoute);
-
 module.exports = adminRoutes;

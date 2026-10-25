@@ -292,6 +292,36 @@ let productController = {
         error: err.message
       });
     }
+  },
+  delete: async (req, res) => {
+    try {
+      let { id } = req.params;
+
+      // 1. Product ko DB se dhundo aur delete karo
+      let deletedProduct = await productModel.findByIdAndDelete(id);
+
+      // 2. Agar product mila hi nahi
+      if (!deletedProduct) {
+        return res.status(404).json({
+          status: false,
+          message: "Product not found"
+        });
+      }
+
+      // 3. Delete ho gaya
+      return res.status(200).json({
+        status: true,
+        message: "Product Deleted Successfully",
+        data: deletedProduct
+      });
+
+    } catch (err) {
+      return res.status(500).json({
+        status: false,
+        message: "Internal Server Error",
+        error: err.message
+      });
+    }
   }
 };
 

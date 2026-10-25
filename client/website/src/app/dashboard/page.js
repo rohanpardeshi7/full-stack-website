@@ -2,13 +2,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { logout } from "../redux/userslice"; // Path match kar lena apne redux slice se
+import { logout } from "../redux/userslice";
 
 import Breadcrumb from "../common/BreadCrumb";
 import Order from "./components/Order";
 import Adddress from "./components/Adddress";
 import Myprofile from "./components/Myprofile";
 import ChangePassword from "./components/ChangePassword";
+import CartPage from "../cart/page";
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -16,14 +17,9 @@ export default function DashboardPage() {
   const dispatch = useDispatch();
 
   const handleLogout = () => {
-    // 1. Redux store clear karein (jisse Header instantly update ho jaye)
     dispatch(logout());
-
-    // 2. Storage clear karein
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
-    // 3. Login page par navigate karein
     router.push("/login");
   };
 
@@ -32,13 +28,15 @@ export default function DashboardPage() {
     { id: "orders", label: "Orders" },
     { id: "addresses", label: "Addresses" },
     { id: "profile", label: "My Profile" },
+    { id: "cart", label: "My Cart" },
     { id: "password", label: "Change Password" },
     { id: "logout", label: "Logout" },
   ];
 
   return (
-    <div className="w-full bg-white py-12 px-4 md:px-6">
-      <div className="max-w-[1120px] mx-auto">
+    <div className="w-full bg-white py-12 px-4 md:px-8">
+      {/* Width ko max-w-[1120px] se badha kar max-w-[1360px] kar diya hai */}
+      <div className="max-w-[1360px] mx-auto w-full">
 
         {/* Breadcrumb Section */}
         <div className="text-center mb-10">
@@ -48,16 +46,16 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Main Dashboard Grid Layout */}
-        <div className="flex flex-col lg:flex-row gap-8 items-start">
+        {/* Main Dashboard Layout */}
+        <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
 
-          {/* LEFT SIDEBAR: 25% Width Navigation Buttons */}
-          <aside className="w-full lg:w-[25%] flex flex-col gap-2 flex-shrink-0">
+          {/* LEFT SIDEBAR: Width 22% ki hai taaki Right side ko aur space mile */}
+          <aside className="w-full lg:w-[22%] flex flex-col gap-2 flex-shrink-0">
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full text-left font-bold text-xs uppercase tracking-wider py-3.5 px-4 transition-colors rounded-sm focus:outline-none ${
+                className={`w-full text-left font-bold text-xs uppercase tracking-wider py-3.5 px-4 transition-colors rounded-sm focus:outline-none cursor-pointer ${
                   activeTab === item.id
                     ? "bg-[#c09578] text-white"
                     : "bg-[#1c1c1c] text-white hover:bg-[#c09578]"
@@ -68,10 +66,10 @@ export default function DashboardPage() {
             ))}
           </aside>
 
-          {/* RIGHT CONTENT AREA: 75% Width Dynamic Component Container */}
-          <main className="w-full lg:w-[75%] bg-white p-2 lg:p-6 rounded-sm min-h-[300px]">
+          {/* RIGHT CONTENT AREA: Width badha kar 78% ki hai */}
+          <main className="w-full lg:w-[78%] bg-white p-4 lg:p-8 rounded-sm min-h-[350px] border border-gray-100 shadow-sm">
 
-            {/* 1. MY DASHBOARD CONTENT */}
+            {/* 1. MY DASHBOARD */}
             {activeTab === "dashboard" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-serif font-bold text-gray-900">My Dashboard</h2>
@@ -84,35 +82,42 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* 2. ORDERS CONTENT */}
+            {/* 2. ORDERS */}
             {activeTab === "orders" && (
               <div className="space-y-4">
                 <Order />
               </div>
             )}
 
-            {/* 3. ADDRESSES CONTENT */}
+            {/* 3. MY CART */}
+            {activeTab === "cart" && (
+              <div className="space-y-4">
+                <CartPage />
+              </div>
+            )}
+
+            {/* 4. ADDRESSES */}
             {activeTab === "addresses" && (
               <div className="space-y-4">
                 <Adddress />
               </div>
             )}
 
-            {/* 4. MY PROFILE CONTENT */}
+            {/* 5. MY PROFILE */}
             {activeTab === "profile" && (
               <div className="space-y-4">
                 <Myprofile />
               </div>
             )}
 
-            {/* 5. CHANGE PASSWORD CONTENT */}
+            {/* 6. CHANGE PASSWORD */}
             {activeTab === "password" && (
               <div className="space-y-4">
                 <ChangePassword />
               </div>
             )}
 
-            {/* 6. LOGOUT CONTENT */}
+            {/* 7. LOGOUT */}
             {activeTab === "logout" && (
               <div className="space-y-4">
                 <h2 className="text-xl font-serif font-bold text-gray-900">Logout</h2>

@@ -49,7 +49,7 @@ let storage = multer.diskStorage({
     productRoute.get('/subSubCategory/:parantID', productController.subSubCategory )
     productRoute.get('/color', productController.color )
     productRoute.get('/material', productController.material )
-
+productRoute.delete("/delete/:id", productController.delete);
 
 
 

@@ -18,7 +18,7 @@ let subCategoryController = {
         }
         
         try {
-            insertobj['slug'] = createSlug(insertObj.name)
+            insertobj['slug'] = createSlug(insertobj.name)
             let checkSubSameCategory = await subCategoryModel.findOne({
                 $or : [
                     {name:name},
