@@ -41,7 +41,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   try {
     await dbConnection();
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(` Server running on port ${PORT}`);
 
     const checkData = await adminModel.findOne();
     if (!checkData) {
@@ -53,6 +53,6 @@ app.listen(PORT, async () => {
       console.log("✅ Default admin created");
     }
   } catch (error) {
-    console.error("❌ Connection error:", error.message);
+    console.error(" Connection error:", error.message);
   }
 });
